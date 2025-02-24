@@ -7,7 +7,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8088', // 后端地址
+        target: 'https://immense-laurena-daliandhc-ab83427a.koyeb.app', // 后端地址
         changeOrigin: true,
         pathRewrite: {
           '^/api': '', // 去掉 /api 前缀
