@@ -34,7 +34,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+
+import {post} from '@/util/request'
 
 export default {
   name: 'LoginPage',
@@ -50,15 +51,15 @@ export default {
     async handleLogin() {
       console.log(this.$store)
       try {
-        const response = await axios.post('/api/login', this.form);
+        const response = await post('/api/login', this.form);
 
-        if (response.data.code === 200) {
+        if (response.code === 200) {
           // 保存用户信息到 localStorage
-          localStorage.setItem('user', JSON.stringify(response.data.data));
+          localStorage.setItem('user', JSON.stringify(response.data));
 
           // 保存用户信息到 Vuex（如果使用 Vuex）
-          // this.$store.commit('setUser', response.data.data);
-          this.$store.dispatch('login', response.data.data);
+          // this.$store.commit('setUser', response.data);
+          this.$store.dispatch('login', response.data);
 
           // 跳转到主页面
           this.$router.push('/home');

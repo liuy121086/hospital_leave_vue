@@ -292,7 +292,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+
+import {get,post,del ,put} from '@/util/request'
 
 export default {
   name: 'LeaveManagementPage',
@@ -380,7 +381,7 @@ export default {
         const end = start + this.pageSize;
         return this.leaves.slice(start, end);
       },
-      
+
     },
   methods: {
 
@@ -419,9 +420,8 @@ export default {
     // 查询科室列表
     async fetchLeaves() {
       try {
-          const response = await axios.get('/api/leaves/query', {
-            params: {
-              current: this.currentPage,
+          const response = await get('/api/leaves/query', {
+            current: this.currentPage,
               size: this.pageSize,
               leaveNo: this.searchform.leaveNo,
               reason: this.searchform.reason,
@@ -431,15 +431,12 @@ export default {
               status: this.searchform.status,
               applyTimeBegin: this.searchform.applyTimeBegin,
               applyTimeEnd: this.searchform.applyTimeEnd
-
-
-            },
           });
-          if (response.data.code === 200) {
-            this.leaves = response.data.data.records; // 更新科室数据
-            this.total = response.data.data.total; // 更新总记录数
+          if (response.code === 200) {
+            this.leaves = response.data.records; // 更新科室数据
+            this.total = response.data.total; // 更新总记录数
           } else {
-            console.error('数据加载失败:', response.data.message);
+            console.error('数据加载失败:', response.message);
           }
         } catch (error) {
           console.error('请求失败:', error);
@@ -468,8 +465,8 @@ export default {
     async handleEdit(row) {
       
       try {
-        const response = await axios.get(`/api/leaves/get/${row.id}`);
-        this.form = response.data.data;
+        const response = await get(`/api/leaves/get/${row.id}`);
+        this.form = response.data;
         this.dialogTitle = row.status!=1?'编辑请假条':'查看请假条';
         this.dialogVisible = true;
       } catch (error) {
@@ -492,7 +489,7 @@ export default {
 
       try {
         const url = '/api/leaves/save';
-        await axios.post(url, this.form);
+        await post(url, this.form);
         this.$message.success('保存成功');
         this.dialogVisible = false;
         this.fetchLeaves(); // 刷新请假条列表
@@ -506,7 +503,7 @@ export default {
     async handleDelete(row) {
       
       try {
-        await axios.delete(`/api/leaves/delete/${row.id}`);
+        await del(`/api/leaves/delete/${row.id}`);
         this.$message.success('删除成功');
         this.fetchLeaves(); // 刷新请假条列表
       } catch (error) {
@@ -518,7 +515,7 @@ export default {
      // 删除请假条
      async handleAudit(row) {
       try {
-        await axios.put(`/api/leaves/audit/${row.id}`);
+        await put(`/api/leaves/audit/${row.id}`);
         this.$message.success('确认成功');
         this.fetchLeaves(); // 刷新请假条列表
       } catch (error) {
@@ -544,8 +541,8 @@ export default {
 
     async fetchEmployeeList() {
       try {
-        const response = await axios.get(`/api/employee/list-all`);
-        this.employeeList = response.data.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
+        const response = await get(`/api/employee/list-all`);
+        this.employeeList = response.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
       } catch (error) {
         console.error('获取员工列表失败:', error);
       }
@@ -555,7 +552,7 @@ export default {
     async downloadExcel() {
   try {
     // 发送请求，设置 responseType 为 'blob'
-    const response = await axios.post('/api/leaves/download-file', null, {
+    const response = await post('/api/leaves/download-file', null, {
       responseType: 'blob' // 确保 responseType 正确设置
     });
 

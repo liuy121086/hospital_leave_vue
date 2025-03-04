@@ -296,7 +296,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+
+import {get,post,del} from '@/util/request'
 
 export default {
   name: 'EmployeementManagementPage',
@@ -415,9 +416,8 @@ export default {
     // 查询科室列表
     async fetchEmployees() {
       try {
-          const response = await axios.get('/api/employee/query', {
-            params: {
-              current: this.currentPage,
+          const response = await get('/api/employee/query', {
+            current: this.currentPage,
               size: this.pageSize,
 
               empNo: this.searchform.empNo,
@@ -430,14 +430,12 @@ export default {
               contactTel: this.searchform.contactTel,
               yearHolidays: this.searchform.yearHolidays,
               otherHolidays: this.searchform.otherHolidays,
-    
-            },
           });
-          if (response.data.code === 200) {
-            this.employees = response.data.data.records; // 更新科室数据
-            this.total = response.data.data.total; // 更新总记录数
+          if (response.code === 200) {
+            this.employees = response.data.records; // 更新科室数据
+            this.total = response.data.total; // 更新总记录数
           } else {
-            console.error('数据加载失败:', response.data.message);
+            console.error('数据加载失败:', response.message);
           }
         } catch (error) {
           console.error('请求失败:', error);
@@ -466,8 +464,8 @@ export default {
     // 打开编辑员工弹窗
     async handleEdit(row) {
       try {
-        const response = await axios.get(`/api/employee/get/${row.id}`);
-        this.form = response.data.data;
+        const response = await get(`/api/employee/get/${row.id}`);
+        this.form = response.data;
         this.dialogTitle = '编辑员工';
         this.dialogVisible = true;
       } catch (error) {
@@ -490,7 +488,7 @@ export default {
 
       try {
         const url = '/api/employee/save';
-        await axios.post(url, this.form);
+        await post(url, this.form);
         this.$message.success('保存成功');
         this.dialogVisible = false;
         this.fetchEmployees(); // 刷新员工列表
@@ -503,7 +501,7 @@ export default {
     // 删除科室
     async handleDelete(row) {
       try {
-        await axios.delete(`/api/employee/delete/${row.id}`);
+        await del(`/api/employee/delete/${row.id}`);
         this.$message.success('删除成功');
         this.fetchEmployees(); // 刷新科室列表
       } catch (error) {
@@ -527,8 +525,8 @@ export default {
 
     async fetchClassesList() {
       try {
-        const response = await axios.get(`/api/classes/list-all`);
-        this.classesList = response.data.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
+        const response = await get(`/api/classes/list-all`);
+        this.classesList = response.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
         this.fetchDepartmentMap();
       } catch (error) {
         console.error('获取员工列表失败:', error);

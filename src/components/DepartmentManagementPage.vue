@@ -150,7 +150,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+
+import {get,post,del} from '@/util/request'
 
 export default {
   name: 'DepartmentManagementPage',
@@ -207,20 +208,18 @@ export default {
     // 查询科室列表
     async fetchDepartments() {
       try {
-          const response = await axios.get('/api/classes/query', {
-            params: {
+          const response = await get('/api/classes/query', {
               current: this.currentPage,
               size: this.pageSize,
               classNo: this.searchform.classNo,
               className: this.searchform.className,
               hospitalName: this.searchform.hospitalName
-            },
           });
-          if (response.data.code === 200) {
-            this.departments = response.data.data.records; // 更新科室数据
-            this.total = response.data.data.total; // 更新总记录数
+          if (response.code === 200) {
+            this.departments = response.data.records; // 更新科室数据
+            this.total = response.data.total; // 更新总记录数
           } else {
-            console.error('数据加载失败:', response.data.message);
+            console.error('数据加载失败:', response.message);
           }
         } catch (error) {
           console.error('请求失败:', error);
@@ -242,8 +241,8 @@ export default {
     // 打开编辑科室弹窗
     async handleEdit(row) {
       try {
-        const response = await axios.get(`/api/classes/get/${row.id}`);
-        this.form = response.data.data;
+        const response = await get(`/api/classes/get/${row.id}`);
+        this.form = response.data;
         this.dialogTitle = '编辑科室';
         this.dialogVisible = true;
       } catch (error) {
@@ -263,7 +262,7 @@ export default {
       if(!myvalid) return ;
       try {
         const url = '/api/classes/save';
-        await axios.post(url, this.form);
+        await post(url, this.form);
         this.$message.success('保存成功');
         this.dialogVisible = false;
         this.fetchDepartments(); // 刷新科室列表
@@ -276,7 +275,7 @@ export default {
     // 删除科室
     async handleDelete(row) {
       try {
-        await axios.delete(`/api/classes/delete/${row.id}`);
+        await del(`/api/classes/delete/${row.id}`);
         this.$message.success('删除成功');
         this.fetchDepartments(); // 刷新科室列表
       } catch (error) {

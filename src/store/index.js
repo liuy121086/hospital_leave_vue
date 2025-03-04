@@ -19,6 +19,7 @@ export default new Vuex.Store({
     clearUser(state) {
       state.user = null;
     },
+
   },
   actions: {
     // 登录操作
@@ -35,5 +36,9 @@ export default new Vuex.Store({
     isAuthenticated(state) {
       return !!state.user;
     },
+
+    token(state) {
+        return state.user.token
+    }
   },
 });
