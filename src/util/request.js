@@ -6,7 +6,7 @@ import router from '@/router' // 根据路由库调整
 
 // 创建 axios 实例
 const service = axios.create({
-  //baseURL: 'http://localhost:8080', // 根据环境变量设置基地址
+  baseURL: 'https://added-mellisa-daliandhc-4db76000.koyeb.app', // 根据环境变量设置基地址
   timeout: 10000, // 超时时间
   withCredentials: true // 跨域时携带 cookie（按需开启）
 })
