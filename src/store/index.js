@@ -38,7 +38,7 @@ export default new Vuex.Store({
     },
 
     token(state) {
-        return state.user.token
+        return state.user?state.user.token:''
     }
   },
 });
