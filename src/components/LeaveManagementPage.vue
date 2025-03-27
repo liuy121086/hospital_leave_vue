@@ -16,7 +16,7 @@
       </el-col>
       <el-col :span="8">
         <el-form-item label="请假天数">
-        <el-input v-model="searchform.dayNum" placeholder="请输入请假天数"></el-input>
+        <el-input v-model="searchform.hours" placeholder="请输入请假小时数"></el-input>
       </el-form-item>
       </el-col>
     </el-row>
@@ -124,7 +124,7 @@
       <el-table-column prop="id" label="ID"></el-table-column>
       <el-table-column prop="leaveNo" label="请假编号"></el-table-column>
       <el-table-column prop="reason" label="请假理由"></el-table-column>
-      <el-table-column prop="dayNum" label="天数"></el-table-column>
+      <el-table-column prop="hours" label="小时数"></el-table-column>
       <el-table-column prop="hospitalName" label="上级组织名称"></el-table-column>
       <el-table-column prop="className" label="科室名称"></el-table-column>
       <el-table-column prop="empName" label="员工姓名"></el-table-column>
@@ -133,7 +133,8 @@
       prop="holidayType"
       label="请假类型"
       :formatter="formatHolidayType" ></el-table-column>
-      <el-table-column prop="applyTime" label="请假时间"></el-table-column>
+      <el-table-column prop="startDate" label="开始日期"></el-table-column>
+      <el-table-column prop="endDate" label="结束日期"></el-table-column>
       <el-table-column
       prop="status"
       label="状态"
@@ -179,19 +180,20 @@
       <el-input v-model="form.id" type="hidden" />
       
       <el-row :gutter="20">
-        <!-- 左侧列 -->
+        <!-- 第一行：请假编号和请假类型 -->
         <el-col :span="12">
           <el-form-item label="请假编号" prop="leaveNo" class="form-item--enhanced">
-            <el-input 
+            <el-input
               v-model="form.leaveNo"
               prefix-icon="el-icon-document"
               :disabled="true"
               clearable
             />
           </el-form-item>
-
+        </el-col>
+        <el-col :span="12">
           <el-form-item label="请假类型" prop="holidayType" class="form-item--enhanced">
-            <el-select 
+            <el-select
               v-model="form.holidayType"
               placeholder="请选择类型"
               prefix-icon="el-icon-collection-tag"
@@ -205,24 +207,14 @@
               />
             </el-select>
           </el-form-item>
-
-          <el-form-item label="请假日期" prop="applyTime" class="form-item--enhanced">
-            <el-date-picker
-              v-model="form.applyTime"
-              type="date"
-              placeholder="选择日期"
-              format="yyyy-MM-dd"
-              value-format="yyyy-MM-dd"
-              prefix-icon="el-icon-date"
-              class="full-width-datepicker"
-            />
-          </el-form-item>
         </el-col>
+      </el-row>
 
-        <!-- 右侧列 -->
+      <el-row :gutter="20">
+        <!-- 第二行：员工姓名和请假天数 -->
         <el-col :span="12">
           <el-form-item label="员工姓名" prop="employeeId" class="form-item--enhanced">
-            <el-select 
+            <el-select
               v-model="form.employeeId"
               placeholder="请选择员工"
               prefix-icon="el-icon-user"
@@ -236,23 +228,84 @@
               />
             </el-select>
           </el-form-item>
-
-          <el-form-item label="请假天数" prop="dayNum" class="form-item--enhanced">
-            <el-input 
-              v-model.number="form.dayNum"
-              placeholder="请输入天数"
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="请假小时数" prop="hours" class="form-item--enhanced">
+            <el-input
+              v-model.number="form.hours"
               type="number"
-              min="0.5"
-              step="0.5"
               prefix-icon="el-icon-s-marketing"
-              clearable
+              :readonly="true"
             >
-              <template slot="append">天</template>
+              <template slot="append">小时</template>
             </el-input>
           </el-form-item>
+        </el-col>
+      </el-row>
 
+      <el-row :gutter="20">
+        <!-- 第三行：请假开始日期和请假开始时间 -->
+        <el-col :span="12">
+          <el-form-item label="请假开始日期" prop="startDate" class="form-item--enhanced">
+            <el-date-picker
+              v-model="form.startDate"
+              type="date"
+              placeholder="选择开始日期"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              prefix-icon="el-icon-date"
+              class="full-width-datepicker"  @change="getHours"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="请假开始时间" prop="startTime" class="form-item--enhanced">
+            <el-time-picker
+              v-model="form.startTime"
+              placeholder="选择开始时间"
+              format="HH:mm"
+              value-format="HH:mm"
+              prefix-icon="el-icon-time"
+              class="full-width-timepicker"  @change="getHours"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20">
+        <!-- 第四行：请假结束日期和请假结束时间 -->
+        <el-col :span="12">
+          <el-form-item label="请假结束日期" prop="endDate" class="form-item--enhanced">
+            <el-date-picker
+              v-model="form.endDate"
+              type="date"
+              placeholder="选择结束日期"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              prefix-icon="el-icon-date"
+              class="full-width-datepicker"  @change="getHours"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="请假结束时间" prop="endTime" class="form-item--enhanced">
+            <el-time-picker
+              v-model="form.endTime"
+              placeholder="选择结束时间"
+              format="HH:mm"
+              value-format="HH:mm"
+              prefix-icon="el-icon-time"
+              class="full-width-timepicker"  @change="getHours"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20">
+        <!-- 最后一行：请假理由 -->
+        <el-col :span="24">
           <el-form-item label="请假理由" prop="reason" class="form-item--enhanced">
-            <el-input 
+            <el-input
               v-model="form.reason"
               placeholder="请输入详细原因"
               type="textarea"
@@ -292,7 +345,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+
+import {get,post,del ,put} from '@/util/request'
 
 export default {
   name: 'LeaveManagementPage',
@@ -312,7 +366,12 @@ export default {
         employeeId: '',
         holidayType: '',
         status: '',
-        applyTime:''
+        applyTime:'',
+        startDate:'2025-01-01',
+        startTime:'00:00',
+        endDate:'2025-01-01',
+        endTime:'00:00',
+        hours:'0'
       },
 
       searchform: {
@@ -354,8 +413,8 @@ export default {
         reason: [
           { required: true, message: '请输入请假原因', trigger: 'blur' }
         ],
-        dayNum: [
-          { required: true, message: '请输入请假天数', trigger: 'blur' }
+        hours: [
+          { required: true, message: '请输入请假小时数', trigger: 'blur' }
         ],
         employeeId: [
           { required: true, message: '请输入员工姓名', trigger: 'blur' }
@@ -380,7 +439,7 @@ export default {
         const end = start + this.pageSize;
         return this.leaves.slice(start, end);
       },
-      
+
     },
   methods: {
 
@@ -418,10 +477,18 @@ export default {
 
     // 查询科室列表
     async fetchLeaves() {
+
+       const loadingInstance = this.$loading({
+               lock: true,
+               text: '加载中...', // 加载提示文字
+               spinner: 'el-icon-loading', // 加载图标
+               background: 'rgba(173, 216, 230, 0.7)' // 背景颜色
+             });
+
+
       try {
-          const response = await axios.get('/api/leaves/query', {
-            params: {
-              current: this.currentPage,
+          const response = await get('/api/leaves/query', {
+            current: this.currentPage,
               size: this.pageSize,
               leaveNo: this.searchform.leaveNo,
               reason: this.searchform.reason,
@@ -431,18 +498,19 @@ export default {
               status: this.searchform.status,
               applyTimeBegin: this.searchform.applyTimeBegin,
               applyTimeEnd: this.searchform.applyTimeEnd
-
-
-            },
           });
-          if (response.data.code === 200) {
-            this.leaves = response.data.data.records; // 更新科室数据
-            this.total = response.data.data.total; // 更新总记录数
+          if (response.code === 200) {
+            this.leaves = response.data.records; // 更新科室数据
+            this.total = response.data.total; // 更新总记录数
           } else {
-            console.error('数据加载失败:', response.data.message);
+            console.error('数据加载失败:', response.message);
           }
         } catch (error) {
           console.error('请求失败:', error);
+        } finally{
+
+            loadingInstance.close(); // 关闭加载提示
+
         }
     },
 
@@ -459,7 +527,12 @@ export default {
         dayNum: 0,
         employeeId: '',
         holidayType: '',
-        applyTime:''
+        applyTime:'',
+        startDate:'2025-01-01',
+        startTime:'00:00',
+        endDate:'2025-01-01',
+        endTime:'00:00',
+        hours:'0'
       };
       this.dialogVisible = true;
     },
@@ -468,8 +541,8 @@ export default {
     async handleEdit(row) {
       
       try {
-        const response = await axios.get(`/api/leaves/get/${row.id}`);
-        this.form = response.data.data;
+        const response = await get(`/api/leaves/get/${row.id}`);
+        this.form = response.data;
         this.dialogTitle = row.status!=1?'编辑请假条':'查看请假条';
         this.dialogVisible = true;
       } catch (error) {
@@ -490,15 +563,25 @@ export default {
       if(!myvalid) return ;
 
 
+        const loadingInstance = this.$loading({
+                       lock: true,
+                       text: '加载中...', // 加载提示文字
+                       spinner: 'el-icon-loading', // 加载图标
+                       background: 'rgba(173, 216, 230, 0.7)' // 背景颜色
+                     });
+
+
       try {
         const url = '/api/leaves/save';
-        await axios.post(url, this.form);
+        await post(url, this.form);
         this.$message.success('保存成功');
         this.dialogVisible = false;
         this.fetchLeaves(); // 刷新请假条列表
       } catch (error) {
         console.error('保存失败:', error);
         this.$message.error('保存失败');
+      } finally {
+        loadingInstance.close(); // 关闭加载提示
       }
     },
 
@@ -506,7 +589,7 @@ export default {
     async handleDelete(row) {
       
       try {
-        await axios.delete(`/api/leaves/delete/${row.id}`);
+        await del(`/api/leaves/delete/${row.id}`);
         this.$message.success('删除成功');
         this.fetchLeaves(); // 刷新请假条列表
       } catch (error) {
@@ -517,14 +600,53 @@ export default {
 
      // 删除请假条
      async handleAudit(row) {
-      try {
-        await axios.put(`/api/leaves/audit/${row.id}`);
+
+        // 显示顶部导航栏加载动画
+      const loadingInstance = this.$loading({
+        lock: true,
+        text: '确认中...', // 加载提示文字
+        spinner: 'el-icon-loading', // 加载图标
+        background: 'rgba(173, 216, 230, 0.7)' // 背景颜色
+      });
+
+        try{
+        await put(`/api/leaves/audit/${row.id}`);
         this.$message.success('确认成功');
         this.fetchLeaves(); // 刷新请假条列表
-      } catch (error) {
-        console.error('确认失败:', error);
-        this.$message.error('确认失败');
-      }
+        } catch (error) {
+          console.error('确认失败:', error);
+        }finally{
+        loadingInstance.close(); // 关闭加载动画
+        }
+    },
+
+    async getHours(){
+
+
+        const loadingInstance = this.$loading({
+                               lock: true,
+                               text: '加载中...', // 加载提示文字
+                               spinner: 'el-icon-loading', // 加载图标
+                               background: 'rgba(173, 216, 230, 0.7)' // 背景颜色
+                             });
+
+        const {startDate, endDate,startTime,endTime} = this.form
+        try {
+           const response =  await get(`/api/leaves/get-leave-hours`,{
+              a: startDate+'T'+startTime,
+              b: endDate+'T'+endTime
+          });
+
+            if (response.code === 200) {
+                this.form.hours = response.data
+            }
+
+          } catch (error) {
+            console.error('确认失败:', error);
+            this.$message.error('确认失败');
+          } finally {
+            loadingInstance.close(); // 关闭加载动画
+          }
     },
 
 
@@ -544,8 +666,8 @@ export default {
 
     async fetchEmployeeList() {
       try {
-        const response = await axios.get(`/api/employee/list-all`);
-        this.employeeList = response.data.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
+        const response = await get(`/api/employee/list-all`);
+        this.employeeList = response.data; // 假设接口返回的数据格式为 [{ id: 1, name: '张三' }, ...]
       } catch (error) {
         console.error('获取员工列表失败:', error);
       }
@@ -555,7 +677,7 @@ export default {
     async downloadExcel() {
   try {
     // 发送请求，设置 responseType 为 'blob'
-    const response = await axios.post('/api/leaves/download-file', null, {
+    const response = await post('/api/leaves/download-file', null, {
       responseType: 'blob' // 确保 responseType 正确设置
     });
 
